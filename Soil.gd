@@ -15,25 +15,26 @@ func _ready():
 func _input(event):
 	var direction = Vector2.ZERO
 
-	if Input.is_action_pressed("ui_up"):
+	if Input.is_action_just_pressed("ui_up"):
 		direction = Vector2(0, -1)
-	elif Input.is_action_pressed("ui_down"):
+	elif Input.is_action_just_pressed("ui_down"):
 		direction = Vector2(0, 1)
-	elif Input.is_action_pressed("ui_left"):
+	elif Input.is_action_just_pressed("ui_left"):
 		direction = Vector2(-1, 0)
-	elif Input.is_action_pressed("ui_right"):
+	elif Input.is_action_just_pressed("ui_right"):
 		direction = Vector2(1, 0)
 
 	if direction != Vector2.ZERO:
 		screen.move_player(direction)
-		screen.steps_taken += 1
 		time.tick()
 		idle_ticks = 0  # Reset idle ticks when moving
-	elif event.is_action_pressed("ui_accept"):  # Space key for ticking forward
+		screen.check_unlock_conditions()  # Check unlock conditions during movement
+	elif Input.is_action_just_pressed("ui_accept"):  # Space key for ticking forward
 		time.tick()
 		idle_ticks += 1  # Increment idle ticks when idling
 		ghis_points += 1  # Accumulate Ghïs points when idling
 		screen.update_tile_states()  # Call method to update tile states based on idle ticks
+		screen.check_unlock_conditions()  # Check unlock conditions during idle
 
 func _on_tick_updated(ticks, cycles, symbol):
 	screen.ticks = ticks

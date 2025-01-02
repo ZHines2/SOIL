@@ -1,0 +1,452 @@
+{
+  "hexagrams": [
+    {
+      "number": 1,
+      "name": "Qián",
+      "character": "乾",
+      "unicode": "䷀",
+      "meaning": "The Creative"
+    },
+    {
+      "number": 2,
+      "name": "Kūn",
+      "character": "坤",
+      "unicode": "䷁",
+      "meaning": "The Receptive"
+    },
+    {
+      "number": 3,
+      "name": "Zhūn",
+      "character": "屯",
+      "unicode": "䷂",
+      "meaning": "Difficulty at the Beginning"
+    },
+    {
+      "number": 4,
+      "name": "Méng",
+      "character": "蒙",
+      "unicode": "䷃",
+      "meaning": "Youthful Folly"
+    },
+    {
+      "number": 5,
+      "name": "Xū",
+      "character": "需",
+      "unicode": "䷄",
+      "meaning": "Waiting (Nourishment)"
+    },
+    {
+      "number": 6,
+      "name": "Sòng",
+      "character": "訟",
+      "unicode": "䷅",
+      "meaning": "Conflict"
+    },
+    {
+      "number": 7,
+      "name": "Shī",
+      "character": "師",
+      "unicode": "䷆",
+      "meaning": "The Army"
+    },
+    {
+      "number": 8,
+      "name": "Bǐ",
+      "character": "比",
+      "unicode": "䷇",
+      "meaning": "Holding Together (Union)"
+    },
+    {
+      "number": 9,
+      "name": "Xiǎo Chù",
+      "character": "小畜",
+      "unicode": "䷈",
+      "meaning": "The Taming Power of the Small"
+    },
+    {
+      "number": 10,
+      "name": "Lǚ",
+      "character": "履",
+      "unicode": "䷉",
+      "meaning": "Treading (Conduct)"
+    },
+    {
+      "number": 11,
+      "name": "Tài",
+      "character": "泰",
+      "unicode": "䷊",
+      "meaning": "Peace"
+    },
+    {
+      "number": 12,
+      "name": "Pǐ",
+      "character": "否",
+      "unicode": "䷋",
+      "meaning": "Standstill (Stagnation)"
+    },
+    {
+      "number": 13,
+      "name": "Tóng Rén",
+      "character": "同人",
+      "unicode": "䷌",
+      "meaning": "Fellowship with Men"
+    },
+    {
+      "number": 14,
+      "name": "Dà Yǒu",
+      "character": "大有",
+      "unicode": "䷍",
+      "meaning": "Possession in Great Measure"
+    },
+    {
+      "number": 15,
+      "name": "Qiān",
+      "character": "謙",
+      "unicode": "䷎",
+      "meaning": "Modesty"
+    },
+    {
+      "number": 16,
+      "name": "Yù",
+      "character": "豫",
+      "unicode": "䷏",
+      "meaning": "Enthusiasm"
+    },
+    {
+      "number": 17,
+      "name": "Suí",
+      "character": "隨",
+      "unicode": "䷐",
+      "meaning": "Following"
+    },
+    {
+      "number": 18,
+      "name": "Gǔ",
+      "character": "蠱",
+      "unicode": "䷑",
+      "meaning": "Work on What Has Been Spoiled"
+    },
+    {
+      "number": 19,
+      "name": "Lín",
+      "character": "臨",
+      "unicode": "䷒",
+      "meaning": "Approach"
+    },
+    {
+      "number": 20,
+      "name": "Guān",
+      "character": "觀",
+      "unicode": "䷓",
+      "meaning": "Contemplation (View)"
+    },
+    {
+      "number": 21,
+      "name": "Shì Kè",
+      "character": "噬嗑",
+      "unicode": "䷔",
+      "meaning": "Biting Through"
+    },
+    {
+      "number": 22,
+      "name": "Bì",
+      "character": "賁",
+      "unicode": "䷕",
+      "meaning": "Grace"
+    },
+    {
+      "number": 23,
+      "name": "Bō",
+      "character": "剝",
+      "unicode": "䷖",
+      "meaning": "Splitting Apart"
+    },
+    {
+      "number": 24,
+      "name": "Fù",
+      "character": "復",
+      "unicode": "䷗",
+      "meaning": "Return (The Turning Point)"
+    },
+    {
+      "number": 25,
+      "name": "Wú Wàng",
+      "character": "無妄",
+      "unicode": "䷘",
+      "meaning": "Innocence (The Unexpected)"
+    },
+    {
+      "number": 26,
+      "name": "Dà Chù",
+      "character": "大畜",
+      "unicode": "䷙",
+      "meaning": "The Taming Power of the Great"
+    },
+    {
+      "number": 27,
+      "name": "Yí",
+      "character": "頤",
+      "unicode": "䷚",
+      "meaning": "The Corners of the Mouth (Providing Nourishment)"
+    },
+    {
+      "number": 28,
+      "name": "Dà Guò",
+      "character": "大過",
+      "unicode": "䷛",
+      "meaning": "Preponderance of the Great"
+    },
+    {
+      "number": 29,
+      "name": "Kǎn",
+      "character": "坎",
+      "unicode": "䷜",
+      "meaning": "The Abysmal (Water)"
+    },
+    {
+      "number": 30,
+      "name": "Lí",
+      "character": "離",
+      "unicode": "䷝",
+      "meaning": "The Clinging (Fire)"
+    },
+    {
+      "number": 31,
+      "name": "Xián",
+      "character": "咸",
+      "unicode": "䷞",
+      "meaning": "Influence (Wooing)"
+    },
+    {
+      "number": 32,
+      "name": "Héng",
+      "character": "恆",
+      "unicode": "䷟",
+      "meaning": "Duration"
+    },
+    {
+      "number": 33,
+      "name": "Dùn",
+      "character": "遯",
+      "unicode": "䷠",
+      "meaning": "Retreat"
+    },
+    {
+      "number": 34,
+      "name": "Dà Zhuàng",
+      "character": "大壯",
+      "unicode": "䷡",
+      "meaning": "The Power of the Great"
+    },
+    {
+      "number": 35,
+      "name": "Jìn",
+      "character": "晉",
+      "unicode": "䷢",
+      "meaning": "Progress"
+    },
+    {
+      "number": 36,
+      "name": "Míng Yí",
+      "character": "明夷",
+      "unicode": "䷣",
+      "meaning": "Darkening of the Light"
+    },
+    {
+      "number": 37,
+      "name": "Jiā Rén",
+      "character": "家人",
+      "unicode": "䷤",
+      "meaning": "The Family (The Clan)"
+    },
+    {
+      "number": 38,
+      "name": "Kuí",
+      "character": "睽",
+      "unicode": "䷥",
+      "meaning": "Opposition"
+    },
+    {
+      "number": 39,
+      "name": "Jiǎn",
+      "character": "蹇",
+      "unicode": "䷦",
+      "meaning": "Obstruction"
+    },
+    {
+      "number": 40,
+      "name": "Jiě",
+      "character": "解",
+      "unicode": "䷧",
+      "meaning": "Deliverance"
+    },
+    {
+      "number": 41,
+      "name": "Sǔn",
+      "character": "損",
+      "unicode": "䷨",
+      "meaning": "Decrease"
+    },
+    {
+      "number": 42,
+      "name": "Yì",
+      "character": "益",
+      "unicode": "䷩",
+      "meaning": "Increase"
+    },
+    {
+      "number": 43,
+      "name": "Guài",
+      "character": "夬",
+      "unicode": "䷪",
+      "meaning": "Breakthrough (Resoluteness)"
+    },
+    {
+      "number": 44,
+      "name": "Gòu",
+      "character": "姤",
+      "unicode": "䷫",
+      "meaning": "Coming to Meet"
+    },
+    {
+      "number": 45,
+      "name": "Cuì",
+      "character": "萃",
+      "unicode": "䷬",
+      "meaning": "Gathering Together (Massing)"
+    },
+    {
+      "number": 46,
+      "name": "Shēng",
+      "character": "升",
+      "unicode": "䷭",
+      "meaning": "Pushing Upward"
+    },
+    {
+      "number": 47,
+      "name": "Kùn",
+      "character": "困",
+      "unicode": "䷮",
+      "meaning": "Oppression (Exhaustion)"
+    },
+    {
+      "number": 48,
+      "name": "Jǐng",
+      "character": "井",
+      "unicode": "䷯",
+      "meaning": "The Well"
+    },
+    {
+      "number": 49,
+      "name": "Gé",
+      "character": "革",
+      "unicode": "䷰",
+      "meaning": "Revolution (Molting)"
+    },
+    {
+      "number": 50,
+      "name": "Dǐng",
+      "character": "鼎",
+      "unicode": "䷱",
+      "meaning": "The Cauldron"
+    },
+    {
+      "number": 51,
+      "name": "Zhèn",
+      "character": "震",
+      "unicode": "䷲",
+      "meaning": "The Arousing (Shock, Thunder)"
+    },
+    {
+      "number": 52,
+      "name": "Gèn",
+      "character": "艮",
+      "unicode": "䷳",
+      "meaning": "Keeping Still, Mountain"
+    },
+    {
+      "number": 53,
+      "name": "Jiàn",
+      "character": "漸",
+      "unicode": "䷴",
+      "meaning": "Development (Gradual Progress)"
+    },
+    {
+      "number": 54,
+      "name": "Guì Mèi",
+      "character": "歸妹",
+      "unicode": "䷵",
+      "meaning": "The Marrying Maiden"
+    },
+    {
+      "number": 55,
+      "name": "Fēng",
+      "character": "豐",
+      "unicode": "䷶",
+      "meaning": "Abundance (Fullness)"
+    },
+    {
+      "number": 56,
+      "name": "Lǚ",
+      "character": "旅",
+      "unicode": "䷷",
+      "meaning": "The Wanderer"
+    },
+    {
+      "number": 57,
+      "name": "Xùn",
+      "character": "巽",
+      "unicode": "䷸",
+      "meaning": "The Gentle (The Penetrating, Wind)"
+    },
+    {
+      "number": 58,
+      "name": "Duì",
+      "character": "兌",
+      "unicode": "䷹",
+      "meaning": "The Joyous, Lake"
+    },
+    {
+      "number": 59,
+      "name": "Huàn",
+      "character": "渙",
+      "unicode": "䷺",
+      "meaning": "Dispersion (Dissolution)"
+    },
+    {
+      "number": 60,
+      "name": "Jié",
+      "character": "節",
+      "unicode": "䷻",
+      "meaning": "Limitation"
+    },
+    {
+      "number": 61,
+      "name": "Zhōng Fú",
+      "character": "中孚",
+      "unicode": "䷼",
+      "meaning": "Inner Truth"
+    },
+    {
+      "number": 62,
+      "name": "Xiǎo Guò",
+      "character": "小過",
+      "unicode": "䷽",
+      "meaning": "Preponderance of the Small"
+    },
+    {
+      "number": 63,
+      "name": "Jì Jì",
+      "character": "既濟",
+      "unicode": "䷾",
+      "meaning": "After Completion"
+    },
+    {
+      "number": 64,
+      "name": "Wèi Jì",
+      "character": "未濟",
+      "unicode": "䷿",
+      "meaning": "Before Completion"
+    }
+  ]
+}

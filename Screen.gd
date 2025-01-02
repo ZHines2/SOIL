@@ -1,5 +1,6 @@
 extends Node
 
+# Constants
 var map_width = 100
 var map_height = 100
 var viewport_width = 40
@@ -7,6 +8,7 @@ var viewport_height = 20
 var soil_texture = "▒"
 var player_texture = "𐍈"
 
+# Variables
 var player_position = Vector2(50, 50)
 var steps_taken = 0
 var visited_tiles = []
@@ -16,6 +18,8 @@ var ticks = 0
 var cycles = 0
 var idle_ticks = 0  # Track the number of idle ticks
 var ghis_points = 0  # Accumulate Ghïs points
+var unlocked_hexagrams = []  # Track unlocked hexagrams
+
 var tile_states = ["░", "▒", "▓", "█"]  # Define 4 unique tile states
 var tile_state_map = {}  # Dictionary to track the state of each tile
 var tile_idle_map = {}  # Dictionary to track idle ticks for each tile
@@ -36,6 +40,7 @@ func move_player(direction):
 		if player_position not in visited_tiles:
 			visited_tiles.append(player_position)
 		player_position = new_position
+		steps_taken += 1  # Increment steps taken
 		render_viewport()
 
 # Render the current viewport centered around the player
@@ -80,6 +85,14 @@ func generate_menu_output() -> String:
 	output += "| Ghïs: %s %d\n" % ["𐎀", ghis_points]  # Using an ancient symbol to represent Ghïs points
 	output += "| Idle: %s %d\n" % ["✜", idle_ticks]  # Using the cross symbol to represent idle ticks
 	output += "|" + "─".repeat(20) + "\n"
+	output += generate_unlocked_hexagrams()  # Add unlocked hexagrams to the menu
+	return output
+
+# Generate unlocked hexagrams display
+func generate_unlocked_hexagrams() -> String:
+	var output = "| Unlocked Hexagrams: \n"
+	for hexagram in unlocked_hexagrams:
+		output += "| %s\n" % [hexagram["unicode"]]  # Display only the symbol
 	return output
 
 # Generate a bottom border with a scrolling ASCII gradient
@@ -106,31 +119,21 @@ func generate_bottom_border() -> String:
 
 # Update tile states based on idle ticks and propagate the ripple effect
 func update_tile_states():
-	if idle_ticks < 5:
-		return
+	# Ripple effect is turned off by returning early
+	return
 
-	var center = player_position
-	var radius = floor(idle_ticks / 5)  # Each 5 idle ticks increase the radius by 1
+# Check unlock conditions for hexagrams
+func check_unlock_conditions():
+	if ghis_points >= 9 and steps_taken >= 9 and idle_ticks >= 9:
+		unlock_hexagram("Qián")
 
-	for r in range(1, radius + 1):
-		if idle_ticks >= r * 5:
-			for y in range(center.y - r, center.y + r + 1):
-				for x in range(center.x - r, center.x + r + 1):
-					var position = Vector2(x, y)
-					if position.x >= 0 and position.x < map_width and position.y >= 0 and position.y < map_height:
-						var distance = center.distance_to(position)
-						# Include diagonals by considering positions exactly r units away
-						if distance <= float(r) and distance > float(r - 1):
-							# Initialize idle ticks for the tile if not already done
-							if not tile_idle_map.has(position):
-								tile_idle_map[position] = 0
-
-							tile_idle_map[position] += 1
-							if tile_idle_map[position] >= 20:
-								tile_state_map[position] = fully_activated_glyph
-							else:
-								var state_index = floor(tile_idle_map[position] / 5)
-								tile_state_map[position] = tile_states[state_index]
-
-							visited_tiles.append(position)  # Mark the tile as visited
-	render_viewport()  # Ensure the viewport is rendered after updating tile states
+# Unlock a hexagram
+func unlock_hexagram(hexagram_name):
+	var hexagrams = [
+		{"name": "Qián", "unicode": "䷀", "meaning": "The Creative"}  # Add more hexagrams here if needed
+	]
+	for hexagram in hexagrams:
+		if hexagram["name"] == hexagram_name and hexagram not in unlocked_hexagrams:
+			unlocked_hexagrams.append(hexagram)
+			break
+	render_viewport()

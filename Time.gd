@@ -20,3 +20,4 @@ func tick():
 
 	emit_signal("tick_updated", ticks, cycles, cycle_symbols[cycles])
 	print("Tick: %d, Cycle: %s" % [ticks, cycle_symbols[cycles]])
+

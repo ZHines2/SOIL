@@ -21,9 +21,10 @@ func update_state():
 	if idle_ticks >= 20:
 		state = FULLY_ACTIVATED_GLYPH
 	else:
-		state = TILE_STATES[floor(idle_ticks / 5)]
+		var index = floor(idle_ticks / 5)
+		if index < TILE_STATES.size():
+			state = TILE_STATES[index]
 
 # Get the current state of the tile
-func get_state():
+func get_state() -> String:
 	return state
-

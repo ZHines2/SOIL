@@ -5,6 +5,8 @@ extends Node
 
 var idle_ticks = 0  # Track the number of idle ticks
 var ghis_points = 0  # Accumulate Ghïs points
+var spawn_interval = 10  # Interval of ticks to spawn a sprout
+var max_sprouts = 100  # Max number of sprouts on screen
 
 func _ready():
 	add_child(screen)
@@ -42,3 +44,8 @@ func _on_tick_updated(ticks, cycles, symbol):
 	screen.idle_ticks = idle_ticks
 	screen.ghis_points = ghis_points
 	screen.render_viewport()
+
+	if ticks % spawn_interval == 0 and screen.sprouts.size() < max_sprouts:
+		screen.spawn_sprout()
+
+	screen.update_sprouts()  # Update sprouts for decay

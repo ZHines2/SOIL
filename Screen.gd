@@ -11,6 +11,7 @@ const VIEWPORT_HEIGHT = 20
 const SOIL_TEXTURE = "▒"
 const PLAYER_TEXTURE = "𐍈"
 const SPROUT_TEXTURE = "⚲"  # Neuter symbol
+const RECEPTIVE_ZONE_TEXTURE = "▓"  # Texture for receptive zone
 const MAX_SPROUTS = 111  # Maximum number of sprouts
 
 # Variables
@@ -24,9 +25,11 @@ var cycles = 0
 var idle_ticks = 0  # Track the number of idle ticks
 var ghis_points = 0  # Accumulate Ghïs points
 var unlocked_hexagrams = []  # Track unlocked hexagrams
-var sprouts = []  # List to hold sprout positions and decay times
+var sprouts = []  # List to hold sprout positions
 var sprout_count = 0  # Counter for the sprouts collected
 var hexagram_qian_unlocked = false  # Track if Qián is unlocked
+var receptive_zone_spawned = false  # Tracks if the receptive zone has been spawned
+var receptive_zone = []  # List to hold receptive zone positions
 
 var tile_states = ["░", "▒", "▓", "█"]  # Define 4 unique tile states
 var tile_state_map = {}  # Dictionary to track the state of each tile
@@ -87,6 +90,8 @@ func render_viewport():
 					row += SOIL_TEXTURE
 			elif hexagram_qian_unlocked and _is_sprout(position):
 				row += SPROUT_TEXTURE  # Neuter symbol
+			elif _is_receptive_zone(position):
+				row += RECEPTIVE_ZONE_TEXTURE
 			else:
 				row += SOIL_TEXTURE
 		
@@ -130,7 +135,7 @@ func generate_bottom_border() -> String:
 
 	for i in range(total_chars):
 		if i == total_chars / 2:
-			gradient += special_char
+			gradient += special_char  # Place special_char at the middle
 		else:
 			var distance_to_middle = abs(i - total_chars / 2)
 			var max_distance = total_chars / 2
@@ -154,7 +159,8 @@ func check_unlock_conditions():
 # Unlock a hexagram
 func unlock_hexagram(hexagram_name):
 	var hexagrams = [
-		{"name": "Qián", "unicode": "䷀", "meaning": "The Creative"}  # Add more hexagrams here if needed
+		{"name": "Qián", "unicode": "䷀", "meaning": "The Creative"},
+		{"name": "Kūn", "unicode": "䷁", "meaning": "The Receptive"}  # Add more hexagrams here if needed
 	]
 	for hexagram in hexagrams:
 		if hexagram["name"] == hexagram_name and hexagram not in unlocked_hexagrams:
@@ -162,6 +168,8 @@ func unlock_hexagram(hexagram_name):
 			if hexagram_name == "Qián":
 				hexagram_qian_unlocked = true
 				initialize_sprout_mechanics()
+			elif hexagram_name == "Kūn":
+				spawn_receptive_zone()
 			break
 	render_viewport()
 
@@ -182,40 +190,60 @@ func spawn_sprout():
 	var y = randi() % MAP_HEIGHT
 	var position = Vector2(x, y)
 	
-	# Add the sprout to the list of sprouts with a decay time
-	sprouts.append({"position": position, "decay_time": 111})  # Decay time of 111 ticks
+	# Add the sprout to the list of sprouts
+	sprouts.append(position)
 
 	# Update the viewport to display the new sprout
 	render_viewport()
 
 # Check if a position has a sprout
 func _is_sprout(position: Vector2) -> bool:
-	for sprout in sprouts:
-		if sprout["position"] == position:
-			return true
-	return false
+	return position in sprouts
 
 # Collect a sprout at the given position
 func collect_sprout(position: Vector2):
-	var new_sprouts = []
-	for sprout in sprouts:
-		if sprout["position"] != position:
-			new_sprouts.append(sprout)
-		else:
-			sprout_count += 1  # Increment sprout count when collected
+	if position in sprouts:
+		sprouts.erase(position)
+		sprout_count += 1  # Increment sprout count
 
-	sprouts = new_sprouts
+		# Check if 11 sprouts have been collected and the receptive zone hasn't been spawned yet
+		if sprout_count == 11 and not receptive_zone_spawned:
+			unlock_hexagram("Kūn")
+
 	render_viewport()
+
+# Spawn a receptive zone at a random unoccupied location
+func spawn_receptive_zone():
+	while true:
+		var x = randi() % (MAP_WIDTH - 3)
+		var y = randi() % (MAP_HEIGHT - 3)
+		var new_zone = [
+			Vector2(x, y), Vector2(x + 1, y), Vector2(x + 2, y), Vector2(x + 3, y),
+			Vector2(x, y + 1), Vector2(x + 1, y + 1), Vector2(x + 2, y + 1), Vector2(x + 3, y + 1),
+			Vector2(x, y + 2), Vector2(x + 1, y + 2), Vector2(x + 2, y + 2), Vector2(x + 3, y + 2),
+			Vector2(x, y + 3), Vector2(x + 1, y + 3), Vector2(x + 2, y + 3), Vector2(x + 3, y + 3)
+		]
+
+		# Check if the selected zone is unoccupied
+		var occupied = false
+		for pos in new_zone:
+			if _is_sprout(pos) or _is_receptive_zone(pos):
+				occupied = true
+				break
+
+		if not occupied:
+			receptive_zone = new_zone
+			receptive_zone_spawned = true
+			print("A receptive zone has appeared at (%d, %d)" % [x, y])
+			break
+
+	render_viewport()
+
+# Check if a position is part of a receptive zone
+func _is_receptive_zone(position: Vector2) -> bool:
+	return position in receptive_zone
 
 # Update sprouts for decay
 func update_sprouts():
-	for sprout in sprouts:
-		sprout["decay_time"] -= 1
-	
-	var new_sprouts = []
-	for sprout in sprouts:
-		if sprout["decay_time"] > 0:
-			new_sprouts.append(sprout)
-	
-	sprouts = new_sprouts
+	# Placeholder for sprout decay logic if needed
 	render_viewport()

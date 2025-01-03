@@ -26,3 +26,4 @@ func update_state():
 # Get the current state of the tile
 func get_state():
 	return state
+

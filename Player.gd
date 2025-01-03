@@ -3,6 +3,9 @@ extends Node2D
 @export var player_position: Vector2 = Vector2.ZERO
 @export var steps_taken: int = 0
 
+# Reference to the Screen object
+var screen
+
 # Function to move the player one step at a time
 func move(direction: Vector2, map: Node):
 	var new_position = player_position + direction
@@ -13,6 +16,13 @@ func move(direction: Vector2, map: Node):
 			player_position = new_position
 			steps_taken += 1
 
-# Function to get the player's texture
+# Function to get the player's texture from the Screen object
 func get_texture() -> String:
-	return "@"  # ASCII character for the player
+	if screen:
+		return screen.PLAYER_TEXTURE
+	return "𐍈"  # Default ASCII character for the player
+
+# Function to set the Screen object reference
+func set_screen(screen_ref):
+	screen = screen_ref
+

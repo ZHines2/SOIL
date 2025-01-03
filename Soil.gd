@@ -2,6 +2,7 @@ extends Node
 
 @onready var screen = preload("res://Screen.gd").new()
 @onready var time = preload("res://Time.gd").new()
+@onready var player = preload("res://Player.gd").new()
 
 var idle_ticks = 0  # Track the number of idle ticks
 var ghis_points = 0  # Accumulate Ghïs points
@@ -11,8 +12,10 @@ var max_sprouts = 100  # Max number of sprouts on screen
 func _ready():
 	add_child(screen)
 	add_child(time)
+	add_child(player)
 	screen.initialize_screen()
 	time.connect("tick_updated", Callable(self, "_on_tick_updated"))
+	player.set_screen(screen)  # Set the Screen reference in the Player object
 
 func _input(event):
 	var direction = Vector2.ZERO

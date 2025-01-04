@@ -156,11 +156,14 @@ func check_unlock_conditions():
 	if ghis_points >= 9 and steps_taken >= 9 and idle_ticks >= 9:
 		unlock_hexagram("Qián")
 
-# Unlock a hexagram
 func unlock_hexagram(hexagram_name):
 	var hexagrams = [
 		{"name": "Qián", "unicode": "䷀", "meaning": "The Creative"},
-		{"name": "Kūn", "unicode": "䷁", "meaning": "The Receptive"}  # Add more hexagrams here if needed
+		{"name": "Kūn", "unicode": "䷁", "meaning": "The Receptive"},
+		{"name": "Zhūn", "unicode": "䷂", "meaning": "Difficulty at the Beginning"},
+		{"name": "Méng", "unicode": "䷃", "meaning": "Youthful Folly"},
+		{"name": "Xū", "unicode": "䷄", "meaning": "Waiting (Nourishment)"},  # The fifth hexagram
+		# Add more hexagrams here if needed
 	]
 	for hexagram in hexagrams:
 		if hexagram["name"] == hexagram_name and hexagram not in unlocked_hexagrams:

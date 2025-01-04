@@ -25,4 +25,3 @@ func get_texture() -> String:
 # Function to set the Screen object reference
 func set_screen(screen_ref):
 	screen = screen_ref
-

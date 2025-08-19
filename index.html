@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOIL - Emergent Mechanic Game Engine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>土 SOIL 土</h1>
+            <p>Emergent Mechanic Game Engine</p>
+        </header>
+        
+        <div id="game-interface">
+            <div id="viewport-container">
+                <canvas id="game-canvas" width="800" height="400"></canvas>
+            </div>
+            
+            <div id="ui-panel">
+                <div id="status-display">
+                    <div class="stat-group">
+                        <span class="stat-label">𓀇 Position:</span>
+                        <span id="position-display">50, 50</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">→ Steps:</span>
+                        <span id="steps-display">0</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">⨀ Ticks:</span>
+                        <span id="ticks-display">0</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">✜ Idle:</span>
+                        <span id="idle-display">0</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">☯ Ghïs:</span>
+                        <span id="ghis-display">0</span>
+                    </div>
+                    <div class="stat-group" id="sprout-display" style="display: none;">
+                        <span class="stat-label">⚲ Sprouts:</span>
+                        <span id="sprout-count">0</span>
+                    </div>
+                </div>
+                
+                <div id="hexagram-display">
+                    <h3>Unlocked Hexagrams</h3>
+                    <div id="hexagram-list"></div>
+                </div>
+                
+                <div id="controls">
+                    <h3>Controls</h3>
+                    <p>Arrow Keys: Move</p>
+                    <p>Space: Advance Time / Idle</p>
+                    <p>R: Reset Game</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+            <span id="cycle-symbol">⨀</span>
+        </div>
+    </div>
+    
+    <script src="js/gameState.js"></script>
+    <script src="js/hexagrams.js"></script>
+    <script src="js/timeSystem.js"></script>
+    <script src="js/mapSystem.js"></script>
+    <script src="js/playerSystem.js"></script>
+    <script src="js/rendering.js"></script>
+    <script src="js/gameEngine.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

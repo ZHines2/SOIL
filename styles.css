@@ -1,0 +1,244 @@
+/* SOIL Game Engine Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 2px solid #4a4a5c;
+}
+
+header h1 {
+    font-size: 2.5em;
+    color: #f0c674;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 0.1em;
+}
+
+header p {
+    font-size: 1.2em;
+    color: #8abeb7;
+    margin-top: 5px;
+}
+
+#game-interface {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+#viewport-container {
+    flex: 1;
+    border: 2px solid #4a4a5c;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-canvas {
+    background: #000;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+#ui-panel {
+    width: 300px;
+    background: rgba(42, 42, 54, 0.8);
+    border: 2px solid #4a4a5c;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+}
+
+#status-display {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #666;
+}
+
+.stat-group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.stat-label {
+    color: #8abeb7;
+    font-weight: bold;
+}
+
+#hexagram-display {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #666;
+    flex: 1;
+}
+
+#hexagram-display h3 {
+    color: #f0c674;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 1px solid #4a4a5c;
+    padding-bottom: 5px;
+}
+
+#hexagram-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.hexagram-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    background: rgba(240, 198, 116, 0.1);
+    border: 1px solid #f0c674;
+    border-radius: 4px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.hexagram-symbol {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.hexagram-name {
+    font-size: 10px;
+    color: #8abeb7;
+}
+
+#controls {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #666;
+}
+
+#controls h3 {
+    color: #f0c674;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#controls p {
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #b5bd68;
+}
+
+#progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 10px;
+    background: rgba(42, 42, 54, 0.6);
+    border-radius: 8px;
+    border: 1px solid #4a4a5c;
+}
+
+#progress-bar {
+    flex: 1;
+    height: 20px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+#progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #81a2be, #8abeb7, #b5bd68, #f0c674);
+    width: var(--progress, 0%);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+#cycle-symbol {
+    font-size: 24px;
+    color: #f0c674;
+    text-shadow: 0 0 10px rgba(240, 198, 116, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #game-interface {
+        flex-direction: column;
+    }
+    
+    #ui-panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    #ui-panel > div {
+        flex: 1;
+        min-width: 200px;
+    }
+}
+
+/* Special effects for unlocked hexagrams */
+.hexagram-item.newly-unlocked {
+    animation: hexagramUnlock 2s ease-out;
+}
+
+@keyframes hexagramUnlock {
+    0% {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(90deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}

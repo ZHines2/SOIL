@@ -18,6 +18,7 @@ const MAX_SPROUTS = 111  # Maximum number of sprouts
 var player_position = Vector2(50, 50)
 var steps_taken = 0
 var visited_tiles = []
+var visited_tiles_dict = {}  # Dictionary for O(1) position lookups
 var steps_symbol = "→"
 var coords_symbol = "𓀇"
 var ticks = 0
@@ -40,8 +41,13 @@ var gradient_chars = ["░", "▒", "▓", "█"]  # Ensure gradient_chars is de
 var special_char = "✶"  # Special character for the middle of the gradient
 var fully_activated_glyph = "✹"  # Glyph to indicate a fully activated tile
 
+# Ripple effect for tile state propagation
+var ripple = null
+
 # Initialize the screen
 func initialize_screen():
+	# Initialize ripple effect system
+	ripple = Ripple.new()
 	render_viewport()
 
 # Conditional debug print function
@@ -53,8 +59,9 @@ func debug_print(message):
 func move_player(direction):
 	var new_position = player_position + direction
 	if new_position.x >= 0 and new_position.x < MAP_WIDTH and new_position.y >= 0 and new_position.y < MAP_HEIGHT:
-		if player_position not in visited_tiles:
+		if not visited_tiles_dict.has(player_position):
 			visited_tiles.append(player_position)
+			visited_tiles_dict[player_position] = true
 		player_position = new_position
 		steps_taken += 1  # Increment steps taken
 		
@@ -83,7 +90,7 @@ func render_viewport():
 			var position = Vector2(x, y)
 			if position == player_position:
 				row += PLAYER_TEXTURE
-			elif position in visited_tiles:
+			elif visited_tiles_dict.has(position):
 				if tile_state_map.has(position):
 					row += tile_state_map[position]
 				else:
@@ -149,7 +156,15 @@ func generate_bottom_border() -> String:
 
 # Update tile states based on idle ticks and propagate the ripple effect
 func update_tile_states():
-	return
+	if ripple and idle_ticks >= 5:
+		ripple.update_tile_states(player_position, idle_ticks, MAP_WIDTH, MAP_HEIGHT, visited_tiles)
+		# Sync ripple's tile state maps with our own
+		tile_state_map = ripple.tile_state_map
+		tile_idle_map = ripple.tile_idle_map
+		# Update visited tiles dict for newly affected tiles
+		for tile_pos in visited_tiles:
+			if not visited_tiles_dict.has(tile_pos):
+				visited_tiles_dict[tile_pos] = true
 
 # Check unlock conditions for hexagrams
 func check_unlock_conditions():

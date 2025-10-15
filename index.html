@@ -93,10 +93,12 @@
             ghisPoints: 0,
             unlockedHexagrams: [],
             sprouts: [],
+            sproutsDict: {},  // Dictionary for O(1) sprout lookups
             sproutCount: 0,
             hexagramQianUnlocked: false,
             receptiveZoneSpawned: false,
             receptiveZone: [],
+            receptiveZoneDict: {},  // Dictionary for O(1) receptive zone lookups
             tileStateMap: {},
             tileIdleMap: {},
             cycleSymbols: ["⨀", "⨁", "⨂", "⨃", "⨄", "⨅", "⨆", "⨇", "⨈", "⨉"],
@@ -120,11 +122,13 @@
         
         // Helper functions
         function isSprout(position) {
-            return gameState.sprouts.some(s => s.x === position.x && s.y === position.y);
+            const key = positionKey(position);
+            return gameState.sproutsDict[key] === true;
         }
         
         function isReceptiveZone(position) {
-            return gameState.receptiveZone.some(r => r.x === position.x && r.y === position.y);
+            const key = positionKey(position);
+            return gameState.receptiveZoneDict[key] === true;
         }
         
         function positionInArray(position, array) {
@@ -365,6 +369,7 @@
         // Initialize sprout mechanics
         function initializeSproutMechanics() {
             gameState.sprouts = [];
+            gameState.sproutsDict = {};
             gameState.sproutCount = 0;
             // Spawn 10 initial sprouts
             for (let i = 0; i < 10; i++) {
@@ -380,15 +385,25 @@
             const x = Math.floor(Math.random() * MAP_WIDTH);
             const y = Math.floor(Math.random() * MAP_HEIGHT);
             const position = { x, y };
+            const key = positionKey(position);
             
             gameState.sprouts.push(position);
+            gameState.sproutsDict[key] = true;
         }
         
         // Collect sprout
         function collectSprout(position) {
-            const index = gameState.sprouts.findIndex(s => s.x === position.x && s.y === position.y);
-            if (index !== -1) {
-                gameState.sprouts.splice(index, 1);
+            const key = positionKey(position);
+            if (gameState.sproutsDict[key]) {
+                // Remove from dictionary
+                delete gameState.sproutsDict[key];
+                
+                // Remove from array
+                const index = gameState.sprouts.findIndex(s => s.x === position.x && s.y === position.y);
+                if (index !== -1) {
+                    gameState.sprouts.splice(index, 1);
+                }
+                
                 gameState.sproutCount++;
                 
                 // Check if 11 sprouts collected
@@ -424,6 +439,12 @@
                 if (!occupied) {
                     gameState.receptiveZone = newZone;
                     gameState.receptiveZoneSpawned = true;
+                    // Build receptive zone dictionary for fast lookups
+                    gameState.receptiveZoneDict = {};
+                    for (let pos of newZone) {
+                        const key = positionKey(pos);
+                        gameState.receptiveZoneDict[key] = true;
+                    }
                     console.log(`A receptive zone has appeared at (${x}, ${y})`);
                     break;
                 }

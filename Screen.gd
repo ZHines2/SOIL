@@ -27,10 +27,12 @@ var idle_ticks = 0  # Track the number of idle ticks
 var ghis_points = 0  # Accumulate Ghïs points
 var unlocked_hexagrams = []  # Track unlocked hexagrams
 var sprouts = []  # List to hold sprout positions
+var sprouts_dict = {}  # Dictionary for O(1) sprout lookups
 var sprout_count = 0  # Counter for the sprouts collected
 var hexagram_qian_unlocked = false  # Track if Qián is unlocked
 var receptive_zone_spawned = false  # Tracks if the receptive zone has been spawned
 var receptive_zone = []  # List to hold receptive zone positions
+var receptive_zone_dict = {}  # Dictionary for O(1) receptive zone lookups
 
 var tile_states = ["░", "▒", "▓", "█"]  # Define 4 unique tile states
 var tile_state_map = {}  # Dictionary to track the state of each tile
@@ -195,10 +197,13 @@ func unlock_hexagram(hexagram_name):
 func initialize_sprout_mechanics():
 	# Reset or initialize variables related to sprouts
 	sprouts.clear()
+	sprouts_dict.clear()
 	sprout_count = 0
 	# Optionally, spawn initial sprouts
 	for i in range(10):  # Spawn 10 initial sprouts as an example
 		spawn_sprout()
+	# Render once after all sprouts are spawned
+	render_viewport()
 
 # Spawn a sprout at random coordinates
 func spawn_sprout():
@@ -208,20 +213,21 @@ func spawn_sprout():
 	var y = randi() % MAP_HEIGHT
 	var position = Vector2(x, y)
 	
-	# Add the sprout to the list of sprouts
+	# Add the sprout to the list and dictionary
 	sprouts.append(position)
-
-	# Update the viewport to display the new sprout
-	render_viewport()
+	sprouts_dict[position] = true
+	
+	# Note: render_viewport() is called by the parent function
 
 # Check if a position has a sprout
 func _is_sprout(position: Vector2) -> bool:
-	return position in sprouts
+	return sprouts_dict.has(position)
 
 # Collect a sprout at the given position
 func collect_sprout(position: Vector2):
-	if position in sprouts:
+	if sprouts_dict.has(position):
 		sprouts.erase(position)
+		sprouts_dict.erase(position)
 		sprout_count += 1  # Increment sprout count
 
 		# Check if 11 sprouts have been collected and the receptive zone hasn't been spawned yet
@@ -252,6 +258,9 @@ func spawn_receptive_zone():
 		if not occupied:
 			receptive_zone = new_zone
 			receptive_zone_spawned = true
+			# Build receptive zone dictionary for fast lookups
+			for pos in new_zone:
+				receptive_zone_dict[pos] = true
 			print("A receptive zone has appeared at (%d, %d)" % [x, y])
 			break
 
@@ -259,7 +268,7 @@ func spawn_receptive_zone():
 
 # Check if a position is part of a receptive zone
 func _is_receptive_zone(position: Vector2) -> bool:
-	return position in receptive_zone
+	return receptive_zone_dict.has(position)
 
 # Update sprouts for decay
 func update_sprouts():

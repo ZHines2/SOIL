@@ -139,55 +139,9 @@
             return `${position.x},${position.y}`;
         }
         
-        // Update tile states based on idle ticks with ripple effect
+        // Update tile states (ripple effect removed)
         function updateTileStates() {
-            if (gameState.idleTicks < 5) {
-                return;
-            }
-            
-            const radius = Math.floor(gameState.idleTicks / 5);
-            const center = gameState.playerPosition;
-            
-            for (let r = 1; r <= radius; r++) {
-                if (gameState.idleTicks >= r * 5) {
-                    for (let y = center.y - r; y <= center.y + r; y++) {
-                        for (let x = center.x - r; x <= center.x + r; x++) {
-                            if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
-                                const position = { x, y };
-                                const distance = Math.sqrt(Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2));
-                                
-                                // Include positions within the current radius ring
-                                if (distance <= r && distance > r - 1) {
-                                    const key = positionKey(position);
-                                    
-                                    // Initialize idle ticks for this tile
-                                    if (!gameState.tileIdleMap[key]) {
-                                        gameState.tileIdleMap[key] = 0;
-                                    }
-                                    
-                                    gameState.tileIdleMap[key]++;
-                                    
-                                    // Update tile state based on idle ticks
-                                    if (gameState.tileIdleMap[key] >= 20) {
-                                        gameState.tileStateMap[key] = gameState.fullyActivatedGlyph;
-                                    } else {
-                                        const stateIndex = Math.floor(gameState.tileIdleMap[key] / 5);
-                                        if (stateIndex < gameState.tileStates.length) {
-                                            gameState.tileStateMap[key] = gameState.tileStates[stateIndex];
-                                        }
-                                    }
-                                    
-                                    // Mark tile as visited
-                                    if (!gameState.visitedTilesDict[key]) {
-                                        gameState.visitedTiles.push(position);
-                                        gameState.visitedTilesDict[key] = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Ripple mechanic has been removed
         }
         
         // Generate menu output
@@ -484,7 +438,6 @@
                     tick();
                     gameState.idleTicks++;
                     gameState.ghisPoints++;
-                    updateTileStates();  // Update tile states with ripple effect
                     checkUnlockConditions();
                     event.preventDefault();
                     return;

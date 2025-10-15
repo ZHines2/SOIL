@@ -43,13 +43,10 @@ var gradient_chars = ["░", "▒", "▓", "█"]  # Ensure gradient_chars is de
 var special_char = "✶"  # Special character for the middle of the gradient
 var fully_activated_glyph = "✹"  # Glyph to indicate a fully activated tile
 
-# Ripple effect for tile state propagation
-var ripple = null
+
 
 # Initialize the screen
 func initialize_screen():
-	# Initialize ripple effect system
-	ripple = Ripple.new()
 	render_viewport()
 
 # Conditional debug print function
@@ -156,17 +153,10 @@ func generate_bottom_border() -> String:
 
 	return gradient
 
-# Update tile states based on idle ticks and propagate the ripple effect
+# Update tile states based on idle ticks (ripple effect removed)
 func update_tile_states():
-	if ripple and idle_ticks >= 5:
-		ripple.update_tile_states(player_position, idle_ticks, MAP_WIDTH, MAP_HEIGHT, visited_tiles)
-		# Sync ripple's tile state maps with our own
-		tile_state_map = ripple.tile_state_map
-		tile_idle_map = ripple.tile_idle_map
-		# Update visited tiles dict for newly affected tiles
-		for tile_pos in visited_tiles:
-			if not visited_tiles_dict.has(tile_pos):
-				visited_tiles_dict[tile_pos] = true
+	# Ripple mechanic has been removed
+	pass
 
 # Check unlock conditions for hexagrams
 func check_unlock_conditions():

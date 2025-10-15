@@ -18,6 +18,7 @@ const MAX_SPROUTS = 111  # Maximum number of sprouts
 var player_position = Vector2(50, 50)
 var steps_taken = 0
 var visited_tiles = []
+var visited_tiles_dict = {}  # Dictionary for O(1) position lookups
 var steps_symbol = "→"
 var coords_symbol = "𓀇"
 var ticks = 0
@@ -26,10 +27,12 @@ var idle_ticks = 0  # Track the number of idle ticks
 var ghis_points = 0  # Accumulate Ghïs points
 var unlocked_hexagrams = []  # Track unlocked hexagrams
 var sprouts = []  # List to hold sprout positions
+var sprouts_dict = {}  # Dictionary for O(1) sprout lookups
 var sprout_count = 0  # Counter for the sprouts collected
 var hexagram_qian_unlocked = false  # Track if Qián is unlocked
 var receptive_zone_spawned = false  # Tracks if the receptive zone has been spawned
 var receptive_zone = []  # List to hold receptive zone positions
+var receptive_zone_dict = {}  # Dictionary for O(1) receptive zone lookups
 
 var tile_states = ["░", "▒", "▓", "█"]  # Define 4 unique tile states
 var tile_state_map = {}  # Dictionary to track the state of each tile
@@ -40,8 +43,13 @@ var gradient_chars = ["░", "▒", "▓", "█"]  # Ensure gradient_chars is de
 var special_char = "✶"  # Special character for the middle of the gradient
 var fully_activated_glyph = "✹"  # Glyph to indicate a fully activated tile
 
+# Ripple effect for tile state propagation
+var ripple = null
+
 # Initialize the screen
 func initialize_screen():
+	# Initialize ripple effect system
+	ripple = Ripple.new()
 	render_viewport()
 
 # Conditional debug print function
@@ -53,8 +61,9 @@ func debug_print(message):
 func move_player(direction):
 	var new_position = player_position + direction
 	if new_position.x >= 0 and new_position.x < MAP_WIDTH and new_position.y >= 0 and new_position.y < MAP_HEIGHT:
-		if player_position not in visited_tiles:
+		if not visited_tiles_dict.has(player_position):
 			visited_tiles.append(player_position)
+			visited_tiles_dict[player_position] = true
 		player_position = new_position
 		steps_taken += 1  # Increment steps taken
 		
@@ -83,7 +92,7 @@ func render_viewport():
 			var position = Vector2(x, y)
 			if position == player_position:
 				row += PLAYER_TEXTURE
-			elif position in visited_tiles:
+			elif visited_tiles_dict.has(position):
 				if tile_state_map.has(position):
 					row += tile_state_map[position]
 				else:
@@ -149,7 +158,15 @@ func generate_bottom_border() -> String:
 
 # Update tile states based on idle ticks and propagate the ripple effect
 func update_tile_states():
-	return
+	if ripple and idle_ticks >= 5:
+		ripple.update_tile_states(player_position, idle_ticks, MAP_WIDTH, MAP_HEIGHT, visited_tiles)
+		# Sync ripple's tile state maps with our own
+		tile_state_map = ripple.tile_state_map
+		tile_idle_map = ripple.tile_idle_map
+		# Update visited tiles dict for newly affected tiles
+		for tile_pos in visited_tiles:
+			if not visited_tiles_dict.has(tile_pos):
+				visited_tiles_dict[tile_pos] = true
 
 # Check unlock conditions for hexagrams
 func check_unlock_conditions():
@@ -180,10 +197,13 @@ func unlock_hexagram(hexagram_name):
 func initialize_sprout_mechanics():
 	# Reset or initialize variables related to sprouts
 	sprouts.clear()
+	sprouts_dict.clear()
 	sprout_count = 0
 	# Optionally, spawn initial sprouts
 	for i in range(10):  # Spawn 10 initial sprouts as an example
 		spawn_sprout()
+	# Render once after all sprouts are spawned
+	render_viewport()
 
 # Spawn a sprout at random coordinates
 func spawn_sprout():
@@ -193,20 +213,21 @@ func spawn_sprout():
 	var y = randi() % MAP_HEIGHT
 	var position = Vector2(x, y)
 	
-	# Add the sprout to the list of sprouts
+	# Add the sprout to the list and dictionary
 	sprouts.append(position)
-
-	# Update the viewport to display the new sprout
-	render_viewport()
+	sprouts_dict[position] = true
+	
+	# Note: render_viewport() is called by the parent function
 
 # Check if a position has a sprout
 func _is_sprout(position: Vector2) -> bool:
-	return position in sprouts
+	return sprouts_dict.has(position)
 
 # Collect a sprout at the given position
 func collect_sprout(position: Vector2):
-	if position in sprouts:
+	if sprouts_dict.has(position):
 		sprouts.erase(position)
+		sprouts_dict.erase(position)
 		sprout_count += 1  # Increment sprout count
 
 		# Check if 11 sprouts have been collected and the receptive zone hasn't been spawned yet
@@ -237,6 +258,9 @@ func spawn_receptive_zone():
 		if not occupied:
 			receptive_zone = new_zone
 			receptive_zone_spawned = true
+			# Build receptive zone dictionary for fast lookups
+			for pos in new_zone:
+				receptive_zone_dict[pos] = true
 			print("A receptive zone has appeared at (%d, %d)" % [x, y])
 			break
 
@@ -244,7 +268,7 @@ func spawn_receptive_zone():
 
 # Check if a position is part of a receptive zone
 func _is_receptive_zone(position: Vector2) -> bool:
-	return position in receptive_zone
+	return receptive_zone_dict.has(position)
 
 # Update sprouts for decay
 func update_sprouts():

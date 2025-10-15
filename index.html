@@ -84,6 +84,7 @@
             playerPosition: { x: 50, y: 50 },
             stepsTaken: 0,
             visitedTiles: [],
+            visitedTilesDict: {},  // Dictionary for O(1) lookups
             stepsSymbol: "→",
             coordsSymbol: "𓀇",
             ticks: 0,
@@ -92,10 +93,12 @@
             ghisPoints: 0,
             unlockedHexagrams: [],
             sprouts: [],
+            sproutsDict: {},  // Dictionary for O(1) sprout lookups
             sproutCount: 0,
             hexagramQianUnlocked: false,
             receptiveZoneSpawned: false,
             receptiveZone: [],
+            receptiveZoneDict: {},  // Dictionary for O(1) receptive zone lookups
             tileStateMap: {},
             tileIdleMap: {},
             cycleSymbols: ["⨀", "⨁", "⨂", "⨃", "⨄", "⨅", "⨆", "⨇", "⨈", "⨉"],
@@ -119,11 +122,13 @@
         
         // Helper functions
         function isSprout(position) {
-            return gameState.sprouts.some(s => s.x === position.x && s.y === position.y);
+            const key = positionKey(position);
+            return gameState.sproutsDict[key] === true;
         }
         
         function isReceptiveZone(position) {
-            return gameState.receptiveZone.some(r => r.x === position.x && r.y === position.y);
+            const key = positionKey(position);
+            return gameState.receptiveZoneDict[key] === true;
         }
         
         function positionInArray(position, array) {
@@ -132,6 +137,57 @@
         
         function positionKey(position) {
             return `${position.x},${position.y}`;
+        }
+        
+        // Update tile states based on idle ticks with ripple effect
+        function updateTileStates() {
+            if (gameState.idleTicks < 5) {
+                return;
+            }
+            
+            const radius = Math.floor(gameState.idleTicks / 5);
+            const center = gameState.playerPosition;
+            
+            for (let r = 1; r <= radius; r++) {
+                if (gameState.idleTicks >= r * 5) {
+                    for (let y = center.y - r; y <= center.y + r; y++) {
+                        for (let x = center.x - r; x <= center.x + r; x++) {
+                            if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+                                const position = { x, y };
+                                const distance = Math.sqrt(Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2));
+                                
+                                // Include positions within the current radius ring
+                                if (distance <= r && distance > r - 1) {
+                                    const key = positionKey(position);
+                                    
+                                    // Initialize idle ticks for this tile
+                                    if (!gameState.tileIdleMap[key]) {
+                                        gameState.tileIdleMap[key] = 0;
+                                    }
+                                    
+                                    gameState.tileIdleMap[key]++;
+                                    
+                                    // Update tile state based on idle ticks
+                                    if (gameState.tileIdleMap[key] >= 20) {
+                                        gameState.tileStateMap[key] = gameState.fullyActivatedGlyph;
+                                    } else {
+                                        const stateIndex = Math.floor(gameState.tileIdleMap[key] / 5);
+                                        if (stateIndex < gameState.tileStates.length) {
+                                            gameState.tileStateMap[key] = gameState.tileStates[stateIndex];
+                                        }
+                                    }
+                                    
+                                    // Mark tile as visited
+                                    if (!gameState.visitedTilesDict[key]) {
+                                        gameState.visitedTiles.push(position);
+                                        gameState.visitedTilesDict[key] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         // Generate menu output
@@ -201,10 +257,11 @@
                 let row = "";
                 for (let x = finalStartX; x < viewportEndX; x++) {
                     const position = { x, y };
+                    const key = positionKey(position);
+                    
                     if (position.x === gameState.playerPosition.x && position.y === gameState.playerPosition.y) {
                         row += PLAYER_TEXTURE;
-                    } else if (positionInArray(position, gameState.visitedTiles)) {
-                        const key = positionKey(position);
+                    } else if (gameState.visitedTilesDict[key]) {
                         if (gameState.tileStateMap[key]) {
                             row += gameState.tileStateMap[key];
                         } else {
@@ -242,8 +299,10 @@
             if (newPosition.x >= 0 && newPosition.x < MAP_WIDTH && 
                 newPosition.y >= 0 && newPosition.y < MAP_HEIGHT) {
                 
-                if (!positionInArray(gameState.playerPosition, gameState.visitedTiles)) {
+                const currentKey = positionKey(gameState.playerPosition);
+                if (!gameState.visitedTilesDict[currentKey]) {
                     gameState.visitedTiles.push({ ...gameState.playerPosition });
+                    gameState.visitedTilesDict[currentKey] = true;
                 }
                 
                 gameState.playerPosition = newPosition;
@@ -310,6 +369,7 @@
         // Initialize sprout mechanics
         function initializeSproutMechanics() {
             gameState.sprouts = [];
+            gameState.sproutsDict = {};
             gameState.sproutCount = 0;
             // Spawn 10 initial sprouts
             for (let i = 0; i < 10; i++) {
@@ -325,15 +385,25 @@
             const x = Math.floor(Math.random() * MAP_WIDTH);
             const y = Math.floor(Math.random() * MAP_HEIGHT);
             const position = { x, y };
+            const key = positionKey(position);
             
             gameState.sprouts.push(position);
+            gameState.sproutsDict[key] = true;
         }
         
         // Collect sprout
         function collectSprout(position) {
-            const index = gameState.sprouts.findIndex(s => s.x === position.x && s.y === position.y);
-            if (index !== -1) {
-                gameState.sprouts.splice(index, 1);
+            const key = positionKey(position);
+            if (gameState.sproutsDict[key]) {
+                // Remove from dictionary
+                delete gameState.sproutsDict[key];
+                
+                // Remove from array
+                const index = gameState.sprouts.findIndex(s => s.x === position.x && s.y === position.y);
+                if (index !== -1) {
+                    gameState.sprouts.splice(index, 1);
+                }
+                
                 gameState.sproutCount++;
                 
                 // Check if 11 sprouts collected
@@ -369,6 +439,12 @@
                 if (!occupied) {
                     gameState.receptiveZone = newZone;
                     gameState.receptiveZoneSpawned = true;
+                    // Build receptive zone dictionary for fast lookups
+                    gameState.receptiveZoneDict = {};
+                    for (let pos of newZone) {
+                        const key = positionKey(pos);
+                        gameState.receptiveZoneDict[key] = true;
+                    }
                     console.log(`A receptive zone has appeared at (${x}, ${y})`);
                     break;
                 }
@@ -408,6 +484,7 @@
                     tick();
                     gameState.idleTicks++;
                     gameState.ghisPoints++;
+                    updateTileStates();  // Update tile states with ripple effect
                     checkUnlockConditions();
                     event.preventDefault();
                     return;

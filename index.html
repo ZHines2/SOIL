@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOIL - Emergent Mechanic Game Engine</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        #game-output {
+            background-color: #000;
+            color: #0f0;
+            padding: 20px;
+            border: 2px solid #0f0;
+            white-space: pre;
+            font-size: 14px;
+            line-height: 1.2;
+            letter-spacing: 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #instructions {
+            margin-top: 20px;
+            color: #0a0;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        #instructions p {
+            margin: 5px 0;
+        }
+        
+        h1 {
+            color: #0f0;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .highlight {
+            color: #ff0;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>SOIL - Emergent Mechanic Game Engine</h1>
+        <pre id="game-output"></pre>
+        <div id="instructions">
+            <p>Use <span class="highlight">Arrow Keys</span> to move | <span class="highlight">Space</span> to idle and gain Ghïs points</p>
+            <p>Unlock hexagrams by achieving: 9+ Ghïs, 9+ Steps, 9+ Idle ticks</p>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const MAP_WIDTH = 100;
+        const MAP_HEIGHT = 100;
+        const VIEWPORT_WIDTH = 40;
+        const VIEWPORT_HEIGHT = 20;
+        const SOIL_TEXTURE = "▒";
+        const PLAYER_TEXTURE = "𐍈";
+        const SPROUT_TEXTURE = "⚲";
+        const RECEPTIVE_ZONE_TEXTURE = "▓";
+        const MAX_SPROUTS = 111;
+        
+        // Game state
+        let gameState = {
+            playerPosition: { x: 50, y: 50 },
+            stepsTaken: 0,
+            visitedTiles: [],
+            stepsSymbol: "→",
+            coordsSymbol: "𓀇",
+            ticks: 0,
+            cycles: 0,
+            idleTicks: 0,
+            ghisPoints: 0,
+            unlockedHexagrams: [],
+            sprouts: [],
+            sproutCount: 0,
+            hexagramQianUnlocked: false,
+            receptiveZoneSpawned: false,
+            receptiveZone: [],
+            tileStateMap: {},
+            tileIdleMap: {},
+            cycleSymbols: ["⨀", "⨁", "⨂", "⨃", "⨄", "⨅", "⨆", "⨇", "⨈", "⨉"],
+            ticksPerCycle: 100,
+            gradientChars: ["░", "▒", "▓", "█"],
+            specialChar: "✶",
+            tileStates: ["░", "▒", "▓", "█"],
+            fullyActivatedGlyph: "✹",
+            spawnInterval: 10,
+            maxSprouts: 100
+        };
+        
+        // Hexagrams database
+        const hexagrams = [
+            { name: "Qián", unicode: "䷀", meaning: "The Creative" },
+            { name: "Kūn", unicode: "䷁", meaning: "The Receptive" },
+            { name: "Zhūn", unicode: "䷂", meaning: "Difficulty at the Beginning" },
+            { name: "Méng", unicode: "䷃", meaning: "Youthful Folly" },
+            { name: "Xū", unicode: "䷄", meaning: "Waiting (Nourishment)" }
+        ];
+        
+        // Helper functions
+        function isSprout(position) {
+            return gameState.sprouts.some(s => s.x === position.x && s.y === position.y);
+        }
+        
+        function isReceptiveZone(position) {
+            return gameState.receptiveZone.some(r => r.x === position.x && r.y === position.y);
+        }
+        
+        function positionInArray(position, array) {
+            return array.some(p => p.x === position.x && p.y === position.y);
+        }
+        
+        function positionKey(position) {
+            return `${position.x},${position.y}`;
+        }
+        
+        // Generate menu output
+        function generateMenuOutput() {
+            let output = "";
+            output += `| ${gameState.stepsSymbol} ${gameState.stepsTaken} \n`;
+            output += `| ${gameState.coordsSymbol} (${String(gameState.playerPosition.x).padStart(3, '0')}, ${String(gameState.playerPosition.y).padStart(3, '0')}) \n`;
+            output += `| Cycle: ${gameState.cycleSymbols[gameState.cycles]} Ticks: ${gameState.ticks}\n`;
+            output += `| Ghïs: 𐎀 ${gameState.ghisPoints}\n`;
+            output += `| Idle: ✜ ${gameState.idleTicks}\n`;
+            if (gameState.hexagramQianUnlocked) {
+                output += `| ${SPROUT_TEXTURE} ${gameState.sproutCount}\n`;
+            }
+            output += `|${"─".repeat(20)}\n`;
+            output += generateUnlockedHexagrams();
+            return output;
+        }
+        
+        // Generate unlocked hexagrams display
+        function generateUnlockedHexagrams() {
+            let output = "| Unlocked Hexagrams: \n";
+            for (let hexagram of gameState.unlockedHexagrams) {
+                output += `| ${hexagram.unicode}\n`;
+            }
+            return output;
+        }
+        
+        // Generate bottom border with scrolling ASCII gradient
+        function generateBottomBorder() {
+            const totalChars = VIEWPORT_WIDTH;
+            let gradient = "";
+            
+            const progress = (gameState.ticks % gameState.ticksPerCycle) / gameState.ticksPerCycle;
+            const charsToFill = Math.floor(progress * totalChars);
+            
+            for (let i = 0; i < totalChars; i++) {
+                if (i === Math.floor(totalChars / 2)) {
+                    gradient += gameState.specialChar;
+                } else {
+                    const distanceToMiddle = Math.abs(i - totalChars / 2);
+                    const maxDistance = totalChars / 2;
+                    const gradientIndex = Math.floor((1 - distanceToMiddle / maxDistance) * (gameState.gradientChars.length - 1));
+                    if (i < charsToFill) {
+                        gradient += gameState.gradientChars[gradientIndex];
+                    } else {
+                        gradient += gameState.gradientChars[0];
+                    }
+                }
+            }
+            
+            return gradient;
+        }
+        
+        // Render viewport
+        function renderViewport() {
+            const viewportStartX = Math.max(0, gameState.playerPosition.x - Math.floor(VIEWPORT_WIDTH / 2));
+            const viewportStartY = Math.max(0, gameState.playerPosition.y - Math.floor(VIEWPORT_HEIGHT / 2));
+            let viewportEndX = Math.min(MAP_WIDTH, viewportStartX + VIEWPORT_WIDTH);
+            let viewportEndY = Math.min(MAP_HEIGHT, viewportStartY + VIEWPORT_HEIGHT);
+            const finalStartX = Math.max(0, viewportEndX - VIEWPORT_WIDTH);
+            const finalStartY = Math.max(0, viewportEndY - VIEWPORT_HEIGHT);
+            
+            let output = "";
+            const menuOutput = generateMenuOutput().split("\n");
+            
+            for (let y = finalStartY; y < viewportEndY; y++) {
+                let row = "";
+                for (let x = finalStartX; x < viewportEndX; x++) {
+                    const position = { x, y };
+                    if (position.x === gameState.playerPosition.x && position.y === gameState.playerPosition.y) {
+                        row += PLAYER_TEXTURE;
+                    } else if (positionInArray(position, gameState.visitedTiles)) {
+                        const key = positionKey(position);
+                        if (gameState.tileStateMap[key]) {
+                            row += gameState.tileStateMap[key];
+                        } else {
+                            row += SOIL_TEXTURE;
+                        }
+                    } else if (gameState.hexagramQianUnlocked && isSprout(position)) {
+                        row += SPROUT_TEXTURE;
+                    } else if (isReceptiveZone(position)) {
+                        row += RECEPTIVE_ZONE_TEXTURE;
+                    } else {
+                        row += SOIL_TEXTURE;
+                    }
+                }
+                
+                const menuIndex = y - finalStartY;
+                if (menuIndex < menuOutput.length) {
+                    row += "  " + menuOutput[menuIndex];
+                }
+                
+                output += row + "\n";
+            }
+            
+            output += generateBottomBorder();
+            
+            document.getElementById('game-output').textContent = output;
+        }
+        
+        // Move player
+        function movePlayer(direction) {
+            const newPosition = {
+                x: gameState.playerPosition.x + direction.x,
+                y: gameState.playerPosition.y + direction.y
+            };
+            
+            if (newPosition.x >= 0 && newPosition.x < MAP_WIDTH && 
+                newPosition.y >= 0 && newPosition.y < MAP_HEIGHT) {
+                
+                if (!positionInArray(gameState.playerPosition, gameState.visitedTiles)) {
+                    gameState.visitedTiles.push({ ...gameState.playerPosition });
+                }
+                
+                gameState.playerPosition = newPosition;
+                gameState.stepsTaken++;
+                
+                if (gameState.hexagramQianUnlocked && isSprout(gameState.playerPosition)) {
+                    collectSprout(gameState.playerPosition);
+                }
+                
+                renderViewport();
+            }
+        }
+        
+        // Tick function
+        function tick() {
+            gameState.ticks++;
+            
+            if (gameState.ticks >= gameState.ticksPerCycle) {
+                gameState.ticks = 0;
+                gameState.cycles++;
+                if (gameState.cycles >= gameState.cycleSymbols.length) {
+                    gameState.cycles = 0;
+                }
+                
+                // Unlock Xū hexagram on first cycle completion
+                if (gameState.cycles === 1) {
+                    unlockHexagram("Xū");
+                }
+            }
+            
+            // Spawn sprouts periodically if Qián is unlocked
+            if (gameState.hexagramQianUnlocked && 
+                gameState.ticks % gameState.spawnInterval === 0 && 
+                gameState.sprouts.length < gameState.maxSprouts) {
+                spawnSprout();
+            }
+            
+            renderViewport();
+        }
+        
+        // Check unlock conditions
+        function checkUnlockConditions() {
+            if (gameState.ghisPoints >= 9 && gameState.stepsTaken >= 9 && gameState.idleTicks >= 9) {
+                unlockHexagram("Qián");
+            }
+        }
+        
+        // Unlock hexagram
+        function unlockHexagram(hexagramName) {
+            const hexagram = hexagrams.find(h => h.name === hexagramName);
+            if (hexagram && !gameState.unlockedHexagrams.some(h => h.name === hexagramName)) {
+                gameState.unlockedHexagrams.push(hexagram);
+                
+                if (hexagramName === "Qián") {
+                    gameState.hexagramQianUnlocked = true;
+                    initializeSproutMechanics();
+                } else if (hexagramName === "Kūn") {
+                    spawnReceptiveZone();
+                }
+            }
+            renderViewport();
+        }
+        
+        // Initialize sprout mechanics
+        function initializeSproutMechanics() {
+            gameState.sprouts = [];
+            gameState.sproutCount = 0;
+            // Spawn 10 initial sprouts
+            for (let i = 0; i < 10; i++) {
+                spawnSprout();
+            }
+        }
+        
+        // Spawn a sprout
+        function spawnSprout() {
+            if (gameState.sprouts.length >= MAX_SPROUTS) {
+                return;
+            }
+            const x = Math.floor(Math.random() * MAP_WIDTH);
+            const y = Math.floor(Math.random() * MAP_HEIGHT);
+            const position = { x, y };
+            
+            gameState.sprouts.push(position);
+        }
+        
+        // Collect sprout
+        function collectSprout(position) {
+            const index = gameState.sprouts.findIndex(s => s.x === position.x && s.y === position.y);
+            if (index !== -1) {
+                gameState.sprouts.splice(index, 1);
+                gameState.sproutCount++;
+                
+                // Check if 11 sprouts collected
+                if (gameState.sproutCount === 11 && !gameState.receptiveZoneSpawned) {
+                    unlockHexagram("Kūn");
+                }
+            }
+        }
+        
+        // Spawn receptive zone
+        function spawnReceptiveZone() {
+            let attempts = 0;
+            while (attempts < 100) {
+                const x = Math.floor(Math.random() * (MAP_WIDTH - 3));
+                const y = Math.floor(Math.random() * (MAP_HEIGHT - 3));
+                const newZone = [];
+                
+                for (let dy = 0; dy < 4; dy++) {
+                    for (let dx = 0; dx < 4; dx++) {
+                        newZone.push({ x: x + dx, y: y + dy });
+                    }
+                }
+                
+                // Check if zone is unoccupied
+                let occupied = false;
+                for (let pos of newZone) {
+                    if (isSprout(pos) || isReceptiveZone(pos)) {
+                        occupied = true;
+                        break;
+                    }
+                }
+                
+                if (!occupied) {
+                    gameState.receptiveZone = newZone;
+                    gameState.receptiveZoneSpawned = true;
+                    console.log(`A receptive zone has appeared at (${x}, ${y})`);
+                    break;
+                }
+                
+                attempts++;
+            }
+        }
+        
+        // Keyboard input
+        document.addEventListener('keydown', (event) => {
+            let direction = { x: 0, y: 0 };
+            let moved = false;
+            
+            switch(event.key) {
+                case 'ArrowUp':
+                    direction = { x: 0, y: -1 };
+                    moved = true;
+                    event.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    direction = { x: 0, y: 1 };
+                    moved = true;
+                    event.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    direction = { x: -1, y: 0 };
+                    moved = true;
+                    event.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    direction = { x: 1, y: 0 };
+                    moved = true;
+                    event.preventDefault();
+                    break;
+                case ' ':
+                    // Space for idle tick
+                    tick();
+                    gameState.idleTicks++;
+                    gameState.ghisPoints++;
+                    checkUnlockConditions();
+                    event.preventDefault();
+                    return;
+            }
+            
+            if (moved) {
+                movePlayer(direction);
+                tick();
+                gameState.idleTicks = 0;
+                checkUnlockConditions();
+            }
+        });
+        
+        // Initialize game
+        function initGame() {
+            renderViewport();
+        }
+        
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
